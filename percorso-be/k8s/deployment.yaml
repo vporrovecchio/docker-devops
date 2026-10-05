@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lipari-be
+  labels:
+    app: lipari-be
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lipari-be
+  template:
+    metadata:
+      labels:
+        app: lipari-be
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/REPLACE-OWNER/REPLACE-REPO-be:REPLACE-SHA
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lipari-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lipari-config
+                  key: redis-url
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10

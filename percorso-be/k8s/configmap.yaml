@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lipari-config
+data:
+  redis-url: redis://lipari-redis:6379
+  log-level: info
